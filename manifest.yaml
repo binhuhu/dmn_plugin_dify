@@ -1,0 +1,38 @@
+version: 0.1.0
+type: plugin
+author: binhuhu
+name: dmn
+label:
+  en_US: DMN Decision Tables
+  zh_Hans: DMN 决策表
+description:
+  en_US: >-
+    Evaluate and check DMN decision tables locally: all seven hit policies
+    (UNIQUE, ANY, PRIORITY, FIRST, RULE ORDER, OUTPUT ORDER, COLLECT with
+    SUM/MIN/MAX/COUNT), S-FEEL cells, DMN 1.1–1.5 XML or JSON. No service,
+    no credentials, standard library only.
+  zh_Hans: >-
+    在插件内执行和检查 DMN 决策表：支持全部 7 种 Hit Policy（UNIQUE、ANY、PRIORITY、
+    FIRST、RULE ORDER、OUTPUT ORDER、COLLECT 及 SUM/MIN/MAX/COUNT 聚合）、S-FEEL
+    单元格、DMN 1.1–1.5 XML 或 JSON。无需外部服务和凭据。
+icon: icon.svg
+resource:
+  memory: 134217728
+  permission: {}
+plugins:
+  tools:
+    - provider/dmn.yaml
+meta:
+  version: 0.0.1
+  arch:
+    - amd64
+    - arm64
+  runner:
+    language: python
+    version: '3.12'
+    entrypoint: main
+created_at: '2026-11-09T00:00:00Z'
+privacy: PRIVACY.md
+repo: https://github.com/binhuhu/dmn_plugin_dify
+tags:
+  - utilities

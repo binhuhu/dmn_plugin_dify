@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A two-table DMN 1.3 model in the shape Camunda Modeler / Kogito export.
+     Pick one table with decision_id: "eligibility" or "fees". -->
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:camunda="http://camunda.org/schema/1.0/dmn"
+             id="loan" name="Loan approval" namespace="http://example.com/dmn/loan">
+  <decision id="eligibility" name="Loan eligibility">
+    <decisionTable id="eligibility_table" hitPolicy="PRIORITY">
+      <input id="in_score" label="Credit score">
+        <inputExpression id="ie_score" typeRef="number"><text>applicant.creditScore</text></inputExpression>
+      </input>
+      <input id="in_dti" label="Debt to income">
+        <inputExpression id="ie_dti" typeRef="number"><text>applicant.dti</text></inputExpression>
+        <inputValues><text>[0..1]</text></inputValues>
+      </input>
+      <input id="in_status" label="Employment" camunda:inputVariable="status">
+        <inputExpression id="ie_status" typeRef="string"><text>applicant.employment</text></inputExpression>
+        <inputValues><text>"EMPLOYED","SELF_EMPLOYED","UNEMPLOYED"</text></inputValues>
+      </input>
+      <output id="out_decision" name="decision" typeRef="string">
+        <outputValues><text>"DECLINE","REFER","APPROVE"</text></outputValues>
+        <defaultOutputEntry><text>"REFER"</text></defaultOutputEntry>
+      </output>
+      <output id="out_reason" name="reason" typeRef="string"/>
+      <rule id="unemployed">
+        <description>No income source</description>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"UNEMPLOYED"</text></inputEntry>
+        <outputEntry><text>"DECLINE"</text></outputEntry>
+        <outputEntry><text>"no income"</text></outputEntry>
+      </rule>
+      <rule id="low_score">
+        <inputEntry><text>&lt; 580</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"DECLINE"</text></outputEntry>
+        <outputEntry><text>"score below 580"</text></outputEntry>
+      </rule>
+      <rule id="high_dti">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&gt; 0.43</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"REFER"</text></outputEntry>
+        <outputEntry><text>"debt to income above 43%"</text></outputEntry>
+      </rule>
+      <rule id="prime">
+        <inputEntry><text>&gt;= 720</text></inputEntry>
+        <inputEntry><text>[0..0.36]</text></inputEntry>
+        <inputEntry><text>not("UNEMPLOYED")</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"prime applicant"</text></outputEntry>
+      </rule>
+      <rule id="near_prime">
+        <inputEntry><text>[580..720)</text></inputEntry>
+        <inputEntry><text>[0..0.43]</text></inputEntry>
+        <inputEntry><text>"EMPLOYED"</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"near prime, salaried"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="fees" name="Fees">
+    <decisionTable id="fees_table" hitPolicy="COLLECT" aggregation="SUM">
+      <input id="in_amount" label="Amount">
+        <inputExpression typeRef="number"><text>loan.amount</text></inputExpression>
+      </input>
+      <input id="in_channel" label="Channel">
+        <inputExpression typeRef="string"><text>loan.channel</text></inputExpression>
+      </input>
+      <output id="out_fee" name="fee" typeRef="number"/>
+      <rule id="base"><inputEntry><text>-</text></inputEntry><inputEntry><text>-</text></inputEntry><outputEntry><text>50</text></outputEntry></rule>
+      <rule id="large"><inputEntry><text>&gt; 100000</text></inputEntry><inputEntry><text>-</text></inputEntry><outputEntry><text>200</text></outputEntry></rule>
+      <rule id="broker"><inputEntry><text>-</text></inputEntry><inputEntry><text>"BROKER"</text></inputEntry><outputEntry><text>75.5</text></outputEntry></rule>
+    </decisionTable>
+  </decision>
+</definitions>

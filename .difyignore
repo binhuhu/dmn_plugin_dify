@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.git/
+.github/
+.env
+.env.*
+tests/
+scripts/
+dist/
+*.difypkg
+CHANGELOG.md
+.gitignore

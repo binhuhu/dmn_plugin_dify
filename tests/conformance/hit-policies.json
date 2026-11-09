@@ -1,0 +1,136 @@
+{
+  "about": "Language-neutral conformance cases for dmn-table/v1. Each case evaluates `table` (or a named table) with `inputs` and expects `status` and `result` (and optionally `selected`, `error`).",
+  "tables": {
+    "grade": {
+      "format": "dmn-table/v1", "id": "grade", "hit_policy": "UNIQUE",
+      "inputs": [{"id": "score", "expression": "score", "type": "number"}],
+      "outputs": [{"name": "grade", "type": "string"}],
+      "rules": [
+        {"id": "A", "when": [">= 90"], "then": ["A"]},
+        {"id": "B", "when": ["[75..90)"], "then": ["B"]},
+        {"id": "C", "when": ["[60..75)"], "then": ["C"]},
+        {"id": "F", "when": ["< 60"], "then": ["F"]}
+      ]
+    },
+    "unique_overlap": {
+      "format": "dmn-table/v1", "id": "u", "hit_policy": "U",
+      "inputs": [{"id": "x", "expression": "x", "type": "number"}],
+      "outputs": [{"name": "o", "type": "string"}],
+      "rules": [{"id": "low", "when": ["<= 10"], "then": ["low"]}, {"id": "mid", "when": ["[10..20]"], "then": ["mid"]}]
+    },
+    "any": {
+      "format": "dmn-table/v1", "id": "any", "hit_policy": "ANY",
+      "inputs": [{"id": "x", "expression": "x", "type": "number"}],
+      "outputs": [{"name": "o", "type": "string"}],
+      "rules": [
+        {"id": "a", "when": ["> 0"], "then": ["positive"]},
+        {"id": "b", "when": ["> 10"], "then": ["positive"]},
+        {"id": "c", "when": ["> 100"], "then": ["large"]}
+      ]
+    },
+    "priority": {
+      "format": "dmn-table/v1", "id": "p", "hit_policy": "PRIORITY",
+      "inputs": [{"id": "age", "expression": "age", "type": "number"}, {"id": "vip", "expression": "vip", "type": "boolean"}],
+      "outputs": [
+        {"name": "level", "type": "string", "values": ["BLOCK", "REVIEW", "PASS"]},
+        {"name": "lane", "type": "string", "values": ["fast", "normal"]}
+      ],
+      "rules": [
+        {"id": "adult", "when": [">= 18", "-"], "then": ["PASS", "normal"]},
+        {"id": "vip", "when": ["-", "true"], "then": ["PASS", "fast"]},
+        {"id": "minor", "when": ["< 18", "-"], "then": ["REVIEW", "normal"]},
+        {"id": "child", "when": ["< 12", "-"], "then": ["BLOCK", "normal"]}
+      ]
+    },
+    "first": {
+      "format": "dmn-table/v1", "id": "f", "hit_policy": "FIRST",
+      "inputs": [{"id": "amount", "expression": "order.amount", "type": "number"}, {"id": "country", "expression": "order.country", "type": "string"}],
+      "outputs": [{"name": "route", "type": "string"}],
+      "rules": [
+        {"id": "big-cn", "when": ["> 10000", "\"CN\""], "then": ["manual"]},
+        {"id": "big", "when": ["> 10000", "-"], "then": ["review"]},
+        {"id": "any", "when": ["-", "-"], "then": ["auto"]}
+      ]
+    },
+    "rule_order": {
+      "format": "dmn-table/v1", "id": "r", "hit_policy": "RULE ORDER",
+      "inputs": [{"id": "x", "expression": "x", "type": "number"}],
+      "outputs": [{"name": "tag", "type": "string", "values": ["gold", "silver", "bronze"]}],
+      "rules": [
+        {"id": "b", "when": ["> 0"], "then": ["bronze"]},
+        {"id": "g", "when": ["> 100"], "then": ["gold"]},
+        {"id": "s", "when": ["> 50"], "then": ["silver"]}
+      ]
+    },
+    "collect_sum": {
+      "format": "dmn-table/v1", "id": "c", "hit_policy": "C+",
+      "inputs": [{"id": "x", "expression": "x", "type": "number"}],
+      "outputs": [{"name": "fee", "type": "number"}],
+      "rules": [
+        {"id": "base", "when": ["-"], "then": [5]},
+        {"id": "over10", "when": ["> 10"], "then": [5]},
+        {"id": "over20", "when": ["> 20"], "then": [0.1]},
+        {"id": "over30", "when": ["> 30"], "then": [0.2]}
+      ]
+    },
+    "dates_strings": {
+      "format": "dmn-table/v1", "id": "d", "hit_policy": "FIRST",
+      "inputs": [{"id": "day", "expression": "day", "type": "date"}, {"id": "code", "expression": "code", "type": "string"}],
+      "outputs": [{"name": "season", "type": "string"}],
+      "rules": [
+        {"id": "q1", "when": ["[date(\"2026-01-01\")..date(\"2026-03-31\")]", "-"], "then": ["Q1"]},
+        {"id": "late", "when": ["> date(\"2026-03-31\")", "[\"A\"..\"M\"]"], "then": ["later A-M"]},
+        {"id": "none", "when": ["null", "-"], "then": ["no date"]},
+        {"id": "rest", "when": ["-", "-"], "then": ["other"]}
+      ]
+    },
+    "negation": {
+      "format": "dmn-table/v1", "id": "n", "hit_policy": "UNIQUE",
+      "inputs": [{"id": "tier", "expression": "tier", "type": "string"}],
+      "outputs": [{"name": "o", "type": "string"}, {"name": "discount", "type": "number"}],
+      "rules": [
+        {"id": "premium", "when": ["\"gold\", \"platinum\""], "then": ["premium", 0.2]},
+        {"id": "other", "when": ["not(\"gold\", \"platinum\")"], "then": ["standard", 0]}
+      ]
+    }
+  },
+  "cases": [
+    {"name": "UNIQUE single hit", "table": "grade", "inputs": {"score": 92}, "status": "MATCHED", "result": "A", "selected": ["A"]},
+    {"name": "UNIQUE half-open range lower edge", "table": "grade", "inputs": {"score": 75}, "status": "MATCHED", "result": "B"},
+    {"name": "UNIQUE half-open range upper edge excluded", "table": "grade", "inputs": {"score": 89.999}, "status": "MATCHED", "result": "B"},
+    {"name": "UNIQUE decimal input", "table": "grade", "inputs": {"score": 59.5}, "status": "MATCHED", "result": "F"},
+    {"name": "missing input never matches a comparison", "table": "grade", "inputs": {}, "status": "NO_MATCH", "result": null},
+    {"name": "type mismatch never matches", "table": "grade", "inputs": {"score": "92"}, "status": "NO_MATCH", "result": null},
+    {"name": "UNIQUE two hits is a violation", "table": "unique_overlap", "inputs": {"x": 10}, "status": "ERROR", "error": "HIT_POLICY_VIOLATION"},
+    {"name": "UNIQUE one hit next to the overlap", "table": "unique_overlap", "inputs": {"x": 11}, "status": "MATCHED", "result": "mid"},
+    {"name": "ANY identical outputs", "table": "any", "inputs": {"x": 50}, "status": "MATCHED", "result": "positive", "selected": ["a"]},
+    {"name": "ANY differing outputs is a violation", "table": "any", "inputs": {"x": 500}, "status": "ERROR", "error": "HIT_POLICY_VIOLATION"},
+    {"name": "PRIORITY highest first-column priority wins", "table": "priority", "inputs": {"age": 10, "vip": true}, "status": "MATCHED", "result": {"level": "BLOCK", "lane": "normal"}, "selected": ["child"]},
+    {"name": "PRIORITY ties on column 1 broken by column 2", "table": "priority", "inputs": {"age": 30, "vip": true}, "status": "MATCHED", "result": {"level": "PASS", "lane": "fast"}, "selected": ["vip"]},
+    {"name": "PRIORITY single match", "table": "priority", "inputs": {"age": 15, "vip": false}, "status": "MATCHED", "result": {"level": "REVIEW", "lane": "normal"}},
+    {"name": "FIRST takes table order", "table": "first", "inputs": {"order": {"amount": 20000, "country": "CN"}}, "status": "MATCHED", "result": "manual"},
+    {"name": "FIRST falls through", "table": "first", "inputs": {"order": {"amount": 20000, "country": "JP"}}, "status": "MATCHED", "result": "review"},
+    {"name": "FIRST catch-all", "table": "first", "inputs": {"order": {"amount": 1}}, "status": "MATCHED", "result": "auto"},
+    {"name": "RULE ORDER lists all hits in table order", "table": "rule_order", "inputs": {"x": 200}, "status": "MATCHED", "result": ["bronze", "gold", "silver"]},
+    {"name": "OUTPUT ORDER sorts by output priority", "table": "rule_order", "hit_policy": "OUTPUT ORDER", "inputs": {"x": 200}, "status": "MATCHED", "result": ["gold", "silver", "bronze"]},
+    {"name": "COLLECT without aggregation", "table": "rule_order", "hit_policy": "COLLECT", "inputs": {"x": 60}, "status": "MATCHED", "result": ["bronze", "silver"]},
+    {"name": "multi-hit no match is an empty list", "table": "rule_order", "inputs": {"x": -1}, "status": "NO_MATCH", "result": []},
+    {"name": "C+ sums distinct outputs (DMN text)", "table": "collect_sum", "inputs": {"x": 40}, "status": "MATCHED", "result": 5.3},
+    {"name": "C+ with collect_values all (Camunda 7)", "table": "collect_sum", "patch": {"collect_values": "all"}, "inputs": {"x": 40}, "status": "MATCHED", "result": 10.3},
+    {"name": "C# counts distinct outputs", "table": "collect_sum", "hit_policy": "C#", "inputs": {"x": 40}, "status": "MATCHED", "result": 3},
+    {"name": "C< minimum", "table": "collect_sum", "hit_policy": "C<", "inputs": {"x": 40}, "status": "MATCHED", "result": 0.1},
+    {"name": "C> maximum", "table": "collect_sum", "hit_policy": "C>", "inputs": {"x": 40}, "status": "MATCHED", "result": 5},
+    {"name": "decimal sum has no float drift", "table": "collect_sum", "patch": {"rules": [{"id": "a", "when": ["-"], "then": [0.1]}, {"id": "b", "when": ["-"], "then": [0.2]}]}, "inputs": {"x": 1}, "status": "MATCHED", "result": 0.3},
+    {"name": "C# with no hits is 0", "table": "collect_sum", "hit_policy": "C#", "patch": {"rules": [{"id": "a", "when": ["> 100"], "then": [1]}]}, "inputs": {"x": 1}, "status": "NO_MATCH", "result": 0},
+    {"name": "C+ with no hits is null", "table": "collect_sum", "patch": {"rules": [{"id": "a", "when": ["> 100"], "then": [1]}]}, "inputs": {"x": 1}, "status": "NO_MATCH", "result": null},
+    {"name": "date range", "table": "dates_strings", "inputs": {"day": "2026-02-14", "code": "Z"}, "status": "MATCHED", "result": "Q1"},
+    {"name": "date comparison and string range", "table": "dates_strings", "inputs": {"day": "2026-07-01", "code": "Kilo"}, "status": "MATCHED", "result": "later A-M"},
+    {"name": "string range upper bound", "table": "dates_strings", "inputs": {"day": "2026-07-01", "code": "N"}, "status": "MATCHED", "result": "other"},
+    {"name": "null test matches a missing input", "table": "dates_strings", "inputs": {"code": "A"}, "status": "MATCHED", "result": "no date"},
+    {"name": "invalid date string is a type mismatch", "table": "dates_strings", "inputs": {"day": "2026-02-30", "code": "A"}, "status": "MATCHED", "result": "other"},
+    {"name": "list of literals", "table": "negation", "inputs": {"tier": "platinum"}, "status": "MATCHED", "result": {"o": "premium", "discount": 0.2}},
+    {"name": "not() of a list", "table": "negation", "inputs": {"tier": "silver"}, "status": "MATCHED", "result": {"o": "standard", "discount": 0}},
+    {"name": "not() matches a missing value (null = x is false)", "table": "negation", "inputs": {}, "status": "MATCHED", "result": {"o": "standard", "discount": 0}},
+    {"name": "default output on no match", "table": "grade", "patch": {"outputs": [{"name": "grade", "type": "string", "default": "N/A"}]}, "inputs": {}, "status": "DEFAULT", "result": "N/A"}
+  ]
+}

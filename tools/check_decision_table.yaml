@@ -1,0 +1,46 @@
+identity:
+  name: check_decision_table
+  author: binhuhu
+  label:
+    en_US: Check Decision Table
+    zh_Hans: 检查决策表
+description:
+  human:
+    en_US: Validate a decision table and find provable problems (UNIQUE overlaps, ANY conflicts, shadowed or impossible rules, gaps). Returns its sha256 pin and normalized JSON.
+    zh_Hans: 校验决策表并找出可证明的问题（UNIQUE 重叠、ANY 冲突、被遮蔽或不可能命中的规则、覆盖缺口），返回 sha256 固定值和规范化 JSON。
+  llm: Statically check a DMN decision table. Returns findings, validity, its sha256 and the normalized table.
+parameters:
+  - name: table
+    type: any
+    required: true
+    form: form
+    label:
+      en_US: Decision table
+      zh_Hans: 决策表
+    human_description:
+      en_US: A dmn-table/v1 JSON object or string, or DMN 1.1–1.5 XML.
+      zh_Hans: dmn-table/v1 JSON（对象或字符串），或 DMN 1.1–1.5 XML。
+    llm_description: The decision table definition (JSON dmn-table/v1 or DMN XML).
+  - name: decision_id
+    type: string
+    required: false
+    form: form
+    label:
+      en_US: Decision id
+      zh_Hans: 决策 ID
+    human_description:
+      en_US: For DMN XML with several decision tables, the id or name of the one to check.
+      zh_Hans: DMN XML 含多张决策表时，要检查的决策 id 或 name。
+    llm_description: Decision id or name inside a DMN XML file with several decision tables.
+output_schema:
+  type: object
+  properties:
+    valid:
+      type: boolean
+      description: True when the table loads and has no error findings.
+    report:
+      type: object
+      description: Findings, counts, decision summary with sha256, and the normalized table.
+extra:
+  python:
+    source: tools/check_decision_table.py

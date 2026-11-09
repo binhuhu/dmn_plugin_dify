@@ -1,0 +1,22 @@
+[project]
+name = "dmn-plugin-dify"
+version = "0.1.0"
+description = "Pure DMN decision tables for Dify: all hit policies, S-FEEL, DMN XML"
+requires-python = ">=3.12,<3.13"
+dependencies = ["dify-plugin==0.10.2"]
+
+[dependency-groups]
+dev = ["pytest==8.3.5", "ruff==0.11.8"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 140
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "B"]
+# Rule rows are padded to the column count by the loader, so zip() lengths always match.
+ignore = ["B905"]

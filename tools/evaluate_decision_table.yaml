@@ -1,0 +1,88 @@
+identity:
+  name: evaluate_decision_table
+  author: binhuhu
+  label:
+    en_US: Evaluate Decision Table
+    zh_Hans: 执行决策表
+description:
+  human:
+    en_US: Evaluate one DMN decision table (JSON dmn-table/v1 or DMN XML) against an input object. All seven hit policies.
+    zh_Hans: 用一个输入对象执行一张 DMN 决策表（JSON dmn-table/v1 或 DMN XML），支持全部 7 种 Hit Policy。
+  llm: Evaluate a DMN decision table against inputs. Check `status` (MATCHED, DEFAULT, NO_MATCH, ERROR) before using `outputs`.
+parameters:
+  - name: table
+    type: any
+    required: true
+    form: form
+    label:
+      en_US: Decision table
+      zh_Hans: 决策表
+    human_description:
+      en_US: A dmn-table/v1 JSON object or string, or DMN 1.1–1.5 XML. Max 1 MiB.
+      zh_Hans: dmn-table/v1 JSON（对象或字符串），或 DMN 1.1–1.5 XML，最大 1 MiB。
+    llm_description: The decision table definition (JSON dmn-table/v1 or DMN XML).
+  - name: inputs
+    type: any
+    required: true
+    form: llm
+    label:
+      en_US: Inputs
+      zh_Hans: 输入
+    human_description:
+      en_US: Input object (or JSON string). Each input column reads the field path in its expression, e.g. applicant.age. Max 256 KiB.
+      zh_Hans: 输入对象（或 JSON 字符串）。每个输入列按其 expression 中的字段路径取值，如 applicant.age。最大 256 KiB。
+    llm_description: The input object whose fields the table's input expressions read.
+  - name: decision_id
+    type: string
+    required: false
+    form: form
+    label:
+      en_US: Decision id
+      zh_Hans: 决策 ID
+    human_description:
+      en_US: For DMN XML with several decision tables, the id or name of the one to evaluate.
+      zh_Hans: DMN XML 含多张决策表时，要执行的决策 id 或 name。
+    llm_description: Decision id or name inside a DMN XML file with several decision tables.
+  - name: expected_sha256
+    type: string
+    required: false
+    form: form
+    label:
+      en_US: Pinned sha256
+      zh_Hans: 固定 sha256
+    human_description:
+      en_US: Optional. Refuse to run unless the table's canonical sha256 (shown by Check Decision Table) equals this value.
+      zh_Hans: 可选。只有当决策表的规范 sha256（检查工具会给出）等于此值时才执行。
+    llm_description: Optional sha256 pin of the reviewed table.
+  - name: trace
+    type: boolean
+    required: false
+    default: true
+    form: form
+    label:
+      en_US: Include trace
+      zh_Hans: 包含轨迹
+    human_description:
+      en_US: Include per-rule match details (which condition failed).
+      zh_Hans: 是否返回逐条规则的命中详情（哪个条件未满足）。
+    llm_description: Whether to include the per-rule trace.
+output_schema:
+  type: object
+  properties:
+    status:
+      type: string
+      description: MATCHED, DEFAULT, NO_MATCH or ERROR.
+    outputs:
+      type: object
+      description: One key per output column. Single-hit tables give one value per key; RULE ORDER / OUTPUT ORDER / COLLECT give a list per key; aggregations give one value.
+    matched_rules:
+      type: array
+      items:
+        type: string
+      description: Ids of every rule whose conditions all held, in table order.
+    decision:
+      type: object
+      description: The full evaluation envelope (result in DMN shape, selected rules, missing inputs, type mismatches, trace, error).
+extra:
+  python:
+    source: tools/evaluate_decision_table.py

@@ -1,0 +1,23 @@
+{
+  "format": "dmn-table/v1",
+  "id": "shipping-fee",
+  "name": "运费计算",
+  "version": "1.0.0",
+  "hit_policy": "COLLECT",
+  "aggregation": "SUM",
+  "collect_values": "all",
+  "inputs": [
+    {"id": "weight", "label": "重量(kg)", "expression": "parcel.weight", "type": "number", "values": "[0..50]"},
+    {"id": "region", "label": "地区", "expression": "parcel.region", "type": "string", "values": "\"LOCAL\",\"DOMESTIC\",\"REMOTE\""},
+    {"id": "express", "label": "加急", "expression": "parcel.express", "type": "boolean"}
+  ],
+  "outputs": [{"name": "fee", "type": "number"}],
+  "rules": [
+    {"id": "base", "when": ["-", "-", "-"], "then": [8], "annotation": "起步价"},
+    {"id": "heavy", "when": ["> 5", "-", "-"], "then": [6], "annotation": "超过 5kg"},
+    {"id": "very-heavy", "when": ["> 20", "-", "-"], "then": [15]},
+    {"id": "domestic", "when": ["-", "\"DOMESTIC\"", "-"], "then": [4]},
+    {"id": "remote", "when": ["-", "\"REMOTE\"", "-"], "then": [12]},
+    {"id": "express", "when": ["-", "not(\"REMOTE\")", "true"], "then": [10], "annotation": "偏远地区不提供加急"}
+  ]
+}

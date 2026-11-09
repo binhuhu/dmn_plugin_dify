@@ -1,0 +1,19 @@
+identity:
+  author: binhuhu
+  name: dmn
+  label:
+    en_US: DMN Decision Tables
+    zh_Hans: DMN 决策表
+  description:
+    en_US: Evaluate and check DMN decision tables in the plugin. No credentials.
+    zh_Hans: 在插件内执行和检查 DMN 决策表，无需凭据。
+  icon: icon.svg
+  tags:
+    - utilities
+credentials_for_provider: {}
+tools:
+  - tools/evaluate_decision_table.yaml
+  - tools/check_decision_table.yaml
+extra:
+  python:
+    source: provider/dmn.py
