@@ -11,15 +11,15 @@ description:
   llm: Statically check a DMN decision table. Returns findings, validity, its sha256 and the normalized table.
 parameters:
   - name: table
-    type: any
+    type: string
     required: true
     form: form
     label:
       en_US: Decision table
       zh_Hans: 决策表
     human_description:
-      en_US: A dmn-table/v1 JSON object or string, or DMN 1.1–1.5 XML.
-      zh_Hans: dmn-table/v1 JSON（对象或字符串），或 DMN 1.1–1.5 XML。
+      en_US: Paste a dmn-table/v1 JSON table or DMN 1.1–1.5 XML, or insert a text variable that holds one.
+      zh_Hans: 粘贴 dmn-table/v1 JSON 或 DMN 1.1–1.5 XML，或插入保存决策表的文本变量。
     llm_description: The decision table definition (JSON dmn-table/v1 or DMN XML).
   - name: decision_id
     type: string
@@ -38,9 +38,77 @@ output_schema:
     valid:
       type: boolean
       description: True when the table loads and has no error findings.
+    sha256:
+      type: string
+      description: The table's canonical sha256 (RFC 8785), for the evaluate tool's pin; empty when the table does not load.
     report:
       type: object
-      description: Findings, counts, decision summary with sha256, and the normalized table.
+      description: The full check report (dmn-plugin/check.v1).
+      properties:
+        schema:
+          type: string
+        valid:
+          type: boolean
+        decision:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            hit_policy:
+              type: string
+            aggregation:
+              type: string
+            inputs:
+              type: number
+            outputs:
+              type: number
+            rules:
+              type: number
+            sha256:
+              type: string
+            source:
+              type: string
+        counts:
+          type: object
+          properties:
+            errors:
+              type: number
+            warnings:
+              type: number
+            infos:
+              type: number
+        findings:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              severity:
+                type: string
+              rules:
+                type: array
+                items:
+                  type: string
+              message:
+                type: string
+              where:
+                type: string
+        truncated:
+          type: number
+          description: Findings left out beyond the cap.
+        table:
+          type: object
+          description: The normalized dmn-table/v1 JSON (null when the table does not load).
+          properties:
+            format:
+              type: string
+            id:
+              type: string
+            hit_policy:
+              type: string
 extra:
   python:
     source: tools/check_decision_table.py

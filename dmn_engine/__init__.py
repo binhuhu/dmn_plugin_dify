@@ -6,4 +6,4 @@ from .evaluate import evaluate
 from .model import load_table
 
 __all__ = ["DmnError", "canonicalize", "evaluate", "load_table", "table_sha256"]
-__version__ = "0.1.0"
+__version__ = "0.1.1"

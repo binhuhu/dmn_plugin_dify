@@ -1,6 +1,6 @@
 [project]
 name = "dmn-plugin-dify"
-version = "0.1.0"
+version = "0.1.1"
 description = "Pure DMN decision tables for Dify: all hit policies, S-FEEL, DMN XML"
 requires-python = ">=3.12,<3.13"
 dependencies = ["dify-plugin==0.10.2"]

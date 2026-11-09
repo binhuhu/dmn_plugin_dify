@@ -11,26 +11,26 @@ description:
   llm: Evaluate a DMN decision table against inputs. Check `status` (MATCHED, DEFAULT, NO_MATCH, ERROR) before using `outputs`.
 parameters:
   - name: table
-    type: any
+    type: string
     required: true
     form: form
     label:
       en_US: Decision table
       zh_Hans: 决策表
     human_description:
-      en_US: A dmn-table/v1 JSON object or string, or DMN 1.1–1.5 XML. Max 1 MiB.
-      zh_Hans: dmn-table/v1 JSON（对象或字符串），或 DMN 1.1–1.5 XML，最大 1 MiB。
+      en_US: Paste a dmn-table/v1 JSON table or DMN 1.1–1.5 XML, or insert a text variable that holds one. Max 1 MiB.
+      zh_Hans: 粘贴 dmn-table/v1 JSON 或 DMN 1.1–1.5 XML，或插入保存决策表的文本变量。最大 1 MiB。
     llm_description: The decision table definition (JSON dmn-table/v1 or DMN XML).
   - name: inputs
-    type: any
+    type: object
     required: true
     form: llm
     label:
       en_US: Inputs
       zh_Hans: 输入
     human_description:
-      en_US: Input object (or JSON string). Each input column reads the field path in its expression, e.g. applicant.age. Max 256 KiB.
-      zh_Hans: 输入对象（或 JSON 字符串）。每个输入列按其 expression 中的字段路径取值，如 applicant.age。最大 256 KiB。
+      en_US: The input object, as an object variable (Code node, LLM structured output…) or a JSON constant. Each input column reads the field path in its expression, e.g. applicant.age. Max 256 KiB.
+      zh_Hans: 输入对象：选一个对象变量（代码节点、LLM 结构化输出等），或直接填 JSON 常量。每个输入列按其 expression 中的字段路径取值，如 applicant.age。最大 256 KiB。
     llm_description: The input object whose fields the table's input expressions read.
   - name: decision_id
     type: string
@@ -72,9 +72,14 @@ output_schema:
     status:
       type: string
       description: MATCHED, DEFAULT, NO_MATCH or ERROR.
+    value:
+      type: string
+      description: The first output column as text, for IF/ELSE branching (strings as-is, other values as JSON, empty when there is no result).
     outputs:
       type: object
       description: One key per output column. Single-hit tables give one value per key; RULE ORDER / OUTPUT ORDER / COLLECT give a list per key; aggregations give one value.
+      additionalProperties:
+        type: [string, number, boolean, array, object, "null"]
     matched_rules:
       type: array
       items:
@@ -82,7 +87,77 @@ output_schema:
       description: Ids of every rule whose conditions all held, in table order.
     decision:
       type: object
-      description: The full evaluation envelope (result in DMN shape, selected rules, missing inputs, type mismatches, trace, error).
+      description: The full evaluation envelope (dmn-plugin/evaluation.v1).
+      properties:
+        schema:
+          type: string
+        status:
+          type: string
+        decision:
+          type: object
+          description: The table that ran; null when it could not be loaded.
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+            hit_policy:
+              type: string
+            aggregation:
+              type: string
+            sha256:
+              type: string
+            source:
+              type: string
+        matched_rules:
+          type: array
+          items:
+            type: string
+        selected_rules:
+          type: array
+          items:
+            type: string
+          description: The rules whose outputs make up the result.
+        missing_inputs:
+          type: array
+          items:
+            type: string
+        type_mismatches:
+          type: array
+          items:
+            type: object
+            properties:
+              input:
+                type: string
+              expected:
+                type: string
+              value:
+                type: string
+        inputs_used:
+          type: object
+          additionalProperties:
+            type: [string, number, boolean, "null"]
+        trace:
+          type: array
+          items:
+            type: object
+            properties:
+              rule:
+                type: string
+              matched:
+                type: boolean
+        error:
+          type: object
+          description: Null unless status is ERROR.
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            where:
+              type: string
 extra:
   python:
     source: tools/evaluate_decision_table.py

@@ -6,8 +6,8 @@
 
 | 工具 | 作用 | 主要输出变量 |
 |---|---|---|
-| **执行决策表** `evaluate_decision_table` | 用一个输入对象执行一张表 | `status`、`outputs`、`matched_rules`、`decision`（完整结果） |
-| **检查决策表** `check_decision_table` | 不需要输入，找出可证明的问题，给出 sha256 固定值 | `valid`、`report` |
+| **执行决策表** `evaluate_decision_table` | 用一个输入对象执行一张表 | `status`、`value`、`outputs`、`matched_rules`、`decision`（完整结果） |
+| **检查决策表** `check_decision_table` | 不需要输入，找出可证明的问题，给出 sha256 固定值 | `valid`、`sha256`、`report` |
 
 ## 安装
 
@@ -76,10 +76,11 @@
 
 ## 在 Dify 工作流中使用
 
-1. 添加「执行决策表」节点，`决策表` 填 JSON 或 DMN XML（常量），`输入` 选上游节点产出的对象变量（或 JSON 字符串）。
+1. 添加「执行决策表」节点。`决策表` 直接粘贴 JSON 或 DMN XML（也可以插入保存决策表的文本变量）。`输入` 选一个对象变量（代码节点、LLM 结构化输出等），或切换为常量直接填 JSON。
 2. 下游用 `status` 判断：`MATCHED`（有规则命中）、`DEFAULT`（用了默认输出）、`NO_MATCH`、`ERROR`。
-3. 取值用 `outputs`：每个输出列一个键。单命中策略是单个值；RULE ORDER / OUTPUT ORDER / COLLECT 是列表；聚合是单个值。DMN 原样的结果在 `decision.result`。
-4. 生产环境建议用「检查决策表」拿到 `sha256`，填进执行节点的 `固定 sha256`：表一旦被改动，节点会拒绝执行（`PIN_MISMATCH`）。
+3. 分支用 `value`：第一个输出列的值（文本），IF/ELSE 节点可以直接判断，比如 `value` 是 `APPROVE`。字符串原样给出，数字、列表等给紧凑 JSON，没有结果时为空。
+4. 取全部输出用 `outputs`：每个输出列一个键。单命中策略是单个值；RULE ORDER / OUTPUT ORDER / COLLECT 是列表；聚合是单个值。DMN 原样的结果在 `decision.result`；`decision` 的状态、命中规则、错误码等字段在变量选择器里可以直接选。
+5. 生产环境建议先用「检查决策表」拿到 `sha256`，填进执行节点的 `固定 sha256`：表一旦被改动，节点会拒绝执行（`PIN_MISMATCH`）。
 
 ## 检查工具能发现什么
 

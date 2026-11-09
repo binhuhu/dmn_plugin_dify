@@ -20,6 +20,21 @@ def summary(env: dict) -> str:
     return f"{status} · 规则 {rules} · {outputs}" + (" · " + "；".join(extra) if extra else "")
 
 
+def first_output_text(env: dict) -> str:
+    """The first output column as text, so an IF/ELSE node can branch on it
+    without a Code node: strings as-is, everything else as compact JSON,
+    "" when there is no value."""
+    outputs = env.get("outputs") or {}
+    if env["status"] == "ERROR" or not outputs:
+        return ""
+    value = next(iter(outputs.values()))
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+
 class EvaluateDecisionTableTool(Tool):
     def _invoke(self, tool_parameters):
         trace = tool_parameters.get("trace")
@@ -33,6 +48,7 @@ class EvaluateDecisionTableTool(Tool):
         yield self.create_text_message(summary(env))
         yield self.create_json_message(env)
         yield self.create_variable_message("status", env["status"])
+        yield self.create_variable_message("value", first_output_text(env))
         yield self.create_variable_message("outputs", env["outputs"] or {})
         yield self.create_variable_message("matched_rules", env["matched_rules"])
         yield self.create_variable_message("decision", env)

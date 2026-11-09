@@ -23,4 +23,5 @@ class CheckDecisionTableTool(Tool):
         yield self.create_text_message(summary(report))
         yield self.create_json_message(report)
         yield self.create_variable_message("valid", report["valid"])
+        yield self.create_variable_message("sha256", (report.get("decision") or {}).get("sha256") or "")
         yield self.create_variable_message("report", report)
