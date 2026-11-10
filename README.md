@@ -137,3 +137,7 @@ uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python dify-plu
 `tests/conformance/hit-policies.json` 是与语言无关的一致性用例，其他实现（例如浏览器端检查器）可以直接复用。
 
 本插件独立维护，与 `dify_dmn_plugin`（`hu8627/dmn_json`）没有代码或依赖关系。
+
+## 许可
+
+Apache License 2.0，见 [LICENSE](LICENSE) 和 [NOTICE](NOTICE)。打包的 `.difypkg` 也包含这两个文件。

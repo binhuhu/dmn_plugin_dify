@@ -9,6 +9,7 @@ Fixes from the first live test on cloud.dify.ai (0.1.0 ran correctly, but the wo
 - New `value` output: the first output column as text, so an IF/ELSE node can branch on the decision without a Code node.
 - New `sha256` output on the check tool.
 - Tests: 119. New guards check every parameter type against the controls Dify's editor renders, and run a port of Dify's schema matcher over every object output.
+- Licensed under Apache-2.0: `LICENSE` and `NOTICE` are in the repository and in the `.difypkg`; the package build fails if either is missing.
 - `scripts/live_test_dsl.py` writes `dist/dmn-live-test.yml`, the workflow used for the live test: import it in Dify, run it, compare with the expected results in its docstring.
 
 ## 0.1.0 — 2026-11-09

@@ -81,7 +81,15 @@ def collect():
 def check_references(files):
     present = set(files)
     manifest = yaml.safe_load((ROOT / "manifest.yaml").read_text("utf-8"))
-    need = {"manifest.yaml", "main.py", "requirements.txt", f"_assets/{manifest['icon']}", manifest.get("privacy", "PRIVACY.md")}
+    need = {
+        "manifest.yaml",
+        "main.py",
+        "requirements.txt",
+        "LICENSE",
+        "NOTICE",
+        f"_assets/{manifest['icon']}",
+        manifest.get("privacy", "PRIVACY.md"),
+    }
     for prov in manifest["plugins"].get("tools", []):
         need.add(prov)
         p = yaml.safe_load((ROOT / prov).read_text("utf-8"))

@@ -1,0 +1,11 @@
+DMN Decision Tables for Dify (binhuhu/dmn)
+Copyright 2026 binhuhu
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+tests/test_plugin.py contains a Python port of the matchTheSchemaType function
+from Dify (https://github.com/langgenius/dify, file
+web/app/components/workflow/nodes/_base/components/variable/match-schema-type.ts)
+and restates the field names and types of Dify's built-in File schema
+(api/core/schemas/builtin/schemas/v1/file.json). Dify is distributed under the
+Dify Open Source License, which is based on the Apache License 2.0.
